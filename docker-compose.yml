@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+  todo-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: todo-server
+    container_name: todo-node-server
+    restart: unless-stopped
+    command: /usr/src/app/node_modules/.bin/nodemon server.js
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "5000:5000"
+
+    networks:
+      - app-network
+
+  todo-client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    image: todo-client
+    container_name: todo-react-client
+    command: npm start
+    stdin_open: true
+    volumes:
+      - ./client/:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - todo-server
+    ports:
+      - "80:3000"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+volumes:
+  data-volume:
+  node_modules:
+  web-root:
+    driver: local
